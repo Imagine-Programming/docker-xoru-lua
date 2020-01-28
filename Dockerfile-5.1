@@ -1,0 +1,15 @@
+FROM            alpine:latest
+ARG             PUID=1000
+ARG             PGID=1000
+RUN             addgroup -g ${PGID} -S lua && \
+                adduser -u ${PUID} -G lua -h /home/lua -D lua
+RUN             apk update && apk add --no-cache lua5.1-libs lua5.1 lua5.1-dev luarocks tini
+RUN             ln -s /usr/sbin/lua5.1          /usr/sbin/lua
+RUN             ln -s /usr/sbin/luac5.1         /usr/sbin/luac
+RUN             ln -s /usr/bin/luarocks-5.1     /usr/sbin/luarocks
+RUN             mkdir -p /app
+RUN             chown -R ${PUID}:${PGID} /app
+RUN             echo $'print("Hello World!!");' >> /app/main.lua
+VOLUME          /app
+ENTRYPOINT      ["/sbin/tini", "--"]
+CMD             ["lua", "/app/main.lua"]
